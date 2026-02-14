@@ -12,8 +12,10 @@ function NavLink({ href, label }: { href: string; label: string }) {
     <Link
       href={href}
       className={cx(
-        "rounded-md px-3 py-2 text-sm font-medium transition",
-        active ? "bg-zinc-900 text-white" : "text-zinc-700 hover:bg-zinc-100",
+        "rounded-xl px-3 py-2 text-sm font-medium transition",
+        active
+          ? "bg-indigo-600 text-white shadow-sm"
+          : "text-slate-700 hover:bg-slate-100",
       )}
     >
       {label}
@@ -25,15 +27,22 @@ export function TopNav() {
   const { user, logout, hasRole } = useAuth();
 
   return (
-    <header className="border-b bg-white">
-      <div className="mx-auto flex max-w-6xl items-center justify-between px-4 py-3">
-        <div className="flex items-center gap-2">
-          <Link href="/board" className="text-base font-semibold">
-            Task Platform
+    <header className="sticky top-0 z-50 border-b bg-white/80 backdrop-blur">
+      <div className="tm-container flex items-center justify-between py-3">
+        <div className="flex items-center gap-3">
+          <Link href="/board" className="flex items-center gap-3">
+            <span className="grid h-9 w-9 place-items-center rounded-2xl bg-indigo-600 text-sm font-semibold text-white shadow-sm">
+              TM
+            </span>
+            <div className="leading-tight">
+              <div className="text-sm font-semibold text-slate-900">
+                Task Platform
+              </div>
+              <div className="hidden text-xs text-slate-500 sm:block">
+                Kanban • RBAC • Realtime
+              </div>
+            </div>
           </Link>
-          <span className="hidden text-xs text-zinc-500 sm:inline">
-            RBAC + Realtime
-          </span>
         </div>
 
         {user ? (
@@ -42,17 +51,25 @@ export function TopNav() {
             {hasRole("admin", "manager") && (
               <NavLink href="/users" label="Users" />
             )}
-            <button
-              onClick={() => logout()}
-              className="rounded-md border px-3 py-2 text-sm hover:bg-zinc-50"
-            >
+
+            <div className="hidden items-center gap-2 rounded-xl border bg-white px-3 py-2 text-sm text-slate-700 md:flex">
+              <span className="h-2 w-2 rounded-full bg-emerald-500" />
+              <span className="max-w-48 truncate">{user.name}</span>
+              <span className="tm-badge bg-slate-50 text-slate-700">
+                {user.role}
+              </span>
+            </div>
+
+            <button onClick={() => logout()} className="tm-button-secondary">
               Logout
             </button>
           </nav>
         ) : (
           <nav className="flex items-center gap-2">
             <NavLink href="/login" label="Login" />
-            <NavLink href="/signup" label="Signup" />
+            <Link href="/signup" className="tm-button">
+              Create account
+            </Link>
           </nav>
         )}
       </div>

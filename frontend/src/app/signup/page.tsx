@@ -38,69 +38,80 @@ export default function SignupPage() {
   };
 
   return (
-    <main className="mx-auto max-w-md px-4 py-10">
-      <h1 className="text-2xl font-semibold">Create account</h1>
-      <p className="mt-1 text-sm text-zinc-600">
-        First user becomes admin automatically.
-      </p>
-
-      <form onSubmit={handleSubmit(onSubmit)} className="mt-6 space-y-4">
-        <div>
-          <label className="text-sm font-medium">Name</label>
-          <input
-            className="mt-1 w-full rounded-md border px-3 py-2"
-            {...register("name")}
-          />
-          {errors.name && (
-            <p className="mt-1 text-sm text-red-600">{errors.name.message}</p>
-          )}
-        </div>
-
-        <div>
-          <label className="text-sm font-medium">Email</label>
-          <input
-            className="mt-1 w-full rounded-md border px-3 py-2"
-            type="email"
-            {...register("email")}
-          />
-          {errors.email && (
-            <p className="mt-1 text-sm text-red-600">{errors.email.message}</p>
-          )}
-        </div>
-
-        <div>
-          <label className="text-sm font-medium">Password</label>
-          <input
-            className="mt-1 w-full rounded-md border px-3 py-2"
-            type="password"
-            {...register("password")}
-          />
-          {errors.password && (
-            <p className="mt-1 text-sm text-red-600">
-              {errors.password.message}
-            </p>
-          )}
-        </div>
-
-        {error && (
-          <p className="rounded-md border border-red-200 bg-red-50 p-3 text-sm text-red-700">
-            {error}
+    <main className="tm-container py-10">
+      <div className="mx-auto max-w-md">
+        <div className="tm-card p-6 sm:p-7">
+          <div className="tm-badge bg-indigo-50 text-indigo-700">
+            New workspace
+          </div>
+          <h1 className="mt-3 text-2xl font-semibold tracking-tight text-slate-900">
+            Create your account
+          </h1>
+          <p className="mt-1 text-sm text-slate-600">
+            First user becomes admin automatically.
           </p>
-        )}
 
-        <button
-          disabled={isSubmitting}
-          className="w-full rounded-md bg-zinc-900 px-4 py-2 text-white hover:bg-black disabled:opacity-60"
-        >
-          {isSubmitting ? "Creating…" : "Create account"}
-        </button>
+          <form onSubmit={handleSubmit(onSubmit)} className="mt-6 space-y-4">
+            <div>
+              <label className="text-sm font-medium text-slate-800">Name</label>
+              <input className="tm-input mt-1" {...register("name")} />
+              {errors.name && (
+                <p className="mt-1 text-sm text-red-600">
+                  {errors.name.message}
+                </p>
+              )}
+            </div>
 
-        <div className="text-sm">
-          <Link href="/login" className="text-zinc-700 hover:underline">
-            Already have an account? Login
-          </Link>
+            <div>
+              <label className="text-sm font-medium text-slate-800">
+                Email
+              </label>
+              <input
+                className="tm-input mt-1"
+                type="email"
+                {...register("email")}
+              />
+              {errors.email && (
+                <p className="mt-1 text-sm text-red-600">
+                  {errors.email.message}
+                </p>
+              )}
+            </div>
+
+            <div>
+              <label className="text-sm font-medium text-slate-800">
+                Password
+              </label>
+              <input
+                className="tm-input mt-1"
+                type="password"
+                {...register("password")}
+              />
+              {errors.password && (
+                <p className="mt-1 text-sm text-red-600">
+                  {errors.password.message}
+                </p>
+              )}
+            </div>
+
+            {error && (
+              <p className="rounded-xl border border-red-200 bg-red-50 p-3 text-sm text-red-700">
+                {error}
+              </p>
+            )}
+
+            <button disabled={isSubmitting} className="tm-button w-full">
+              {isSubmitting ? "Creating…" : "Create account"}
+            </button>
+
+            <div className="text-sm">
+              <Link href="/login" className="tm-link">
+                Already have an account? Login
+              </Link>
+            </div>
+          </form>
         </div>
-      </form>
+      </div>
     </main>
   );
 }

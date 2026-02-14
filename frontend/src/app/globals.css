@@ -1,8 +1,13 @@
 @import "tailwindcss";
 
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  /* Light theme */
+  --background: #f8fafc; /* slate-50 */
+  --foreground: #0f172a; /* slate-900 */
+  --panel: #ffffff;
+  --muted: #475569; /* slate-600 */
+  --border: #e2e8f0; /* slate-200 */
+  --ring: #6366f1; /* indigo-500 */
 }
 
 @theme inline {
@@ -14,13 +19,88 @@
 
 @media (prefers-color-scheme: dark) {
   :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
+    /* Dark theme */
+    --background: #0b1220;
+    --foreground: #e5e7eb;
+    --panel: #0f172a;
+    --muted: #94a3b8;
+    --border: #1f2937;
+    --ring: #818cf8;
   }
 }
 
 body {
   background: var(--background);
   color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  font-family:
+    var(--font-geist-sans),
+    ui-sans-serif,
+    system-ui,
+    -apple-system,
+    Segoe UI,
+    Roboto,
+    Helvetica,
+    Arial,
+    "Apple Color Emoji",
+    "Segoe UI Emoji";
+}
+
+@layer base {
+  * {
+    border-color: var(--border);
+  }
+
+  ::selection {
+    background: color-mix(in oklab, var(--ring) 25%, transparent);
+  }
+}
+
+@layer components {
+  .tm-container {
+    @apply mx-auto w-full max-w-6xl px-4;
+  }
+
+  .tm-card {
+    @apply rounded-2xl border bg-white shadow-sm;
+  }
+
+  .tm-card-subtle {
+    @apply rounded-2xl border bg-white/70 shadow-sm backdrop-blur;
+  }
+
+  .tm-muted {
+    color: var(--muted);
+  }
+
+  .tm-input {
+    @apply w-full rounded-xl border bg-white px-3 py-2 text-sm shadow-sm outline-none transition;
+    @apply placeholder:text-slate-400;
+    @apply focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/20;
+    @apply disabled:cursor-not-allowed disabled:bg-slate-50 disabled:text-slate-500;
+  }
+
+  .tm-select {
+    @apply w-full rounded-xl border bg-white px-3 py-2 text-sm shadow-sm outline-none transition;
+    @apply focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/20;
+  }
+
+  .tm-button {
+    @apply inline-flex items-center justify-center gap-2 rounded-xl bg-indigo-600 px-4 py-2 text-sm font-medium text-white shadow-sm;
+    @apply hover:bg-indigo-700 active:bg-indigo-700;
+    @apply disabled:pointer-events-none disabled:opacity-60;
+  }
+
+  .tm-button-secondary {
+    @apply inline-flex items-center justify-center gap-2 rounded-xl border bg-white px-4 py-2 text-sm font-medium text-slate-800 shadow-sm;
+    @apply hover:bg-slate-50 active:bg-slate-50;
+    @apply disabled:pointer-events-none disabled:opacity-60;
+  }
+
+  .tm-link {
+    @apply text-slate-700 underline-offset-4 hover:text-slate-900 hover:underline;
+  }
+
+  .tm-badge {
+    @apply inline-flex items-center gap-1 rounded-full border px-2 py-0.5 text-xs font-medium;
+  }
 }

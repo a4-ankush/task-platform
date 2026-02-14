@@ -58,71 +58,84 @@ export default function ResetPasswordClient() {
   };
 
   return (
-    <main className="mx-auto max-w-md px-4 py-10">
-      <h1 className="text-2xl font-semibold">Reset password</h1>
+    <main className="tm-container py-10">
+      <div className="mx-auto max-w-md">
+        <div className="tm-card p-6 sm:p-7">
+          <div className="tm-badge bg-slate-50 text-slate-700">
+            Set a new password
+          </div>
+          <h1 className="mt-3 text-2xl font-semibold tracking-tight text-slate-900">
+            Reset password
+          </h1>
 
-      <form onSubmit={handleSubmit(onSubmit)} className="mt-6 space-y-4">
-        <div>
-          <label className="text-sm font-medium">Email</label>
-          <input
-            className="mt-1 w-full rounded-md border px-3 py-2"
-            type="email"
-            {...register("email")}
-          />
-          {errors.email && (
-            <p className="mt-1 text-sm text-red-600">{errors.email.message}</p>
-          )}
+          <form onSubmit={handleSubmit(onSubmit)} className="mt-6 space-y-4">
+            <div>
+              <label className="text-sm font-medium text-slate-800">
+                Email
+              </label>
+              <input
+                className="tm-input mt-1"
+                type="email"
+                {...register("email")}
+              />
+              {errors.email && (
+                <p className="mt-1 text-sm text-red-600">
+                  {errors.email.message}
+                </p>
+              )}
+            </div>
+
+            <div>
+              <label className="text-sm font-medium text-slate-800">
+                Token
+              </label>
+              <input className="tm-input mt-1" {...register("token")} />
+              {errors.token && (
+                <p className="mt-1 text-sm text-red-600">
+                  {errors.token.message}
+                </p>
+              )}
+            </div>
+
+            <div>
+              <label className="text-sm font-medium text-slate-800">
+                New password
+              </label>
+              <input
+                className="tm-input mt-1"
+                type="password"
+                {...register("newPassword")}
+              />
+              {errors.newPassword && (
+                <p className="mt-1 text-sm text-red-600">
+                  {errors.newPassword.message}
+                </p>
+              )}
+            </div>
+
+            {ok && (
+              <p className="rounded-xl border border-green-200 bg-green-50 p-3 text-sm text-green-700">
+                Password updated.
+              </p>
+            )}
+            {error && (
+              <p className="rounded-xl border border-red-200 bg-red-50 p-3 text-sm text-red-700">
+                {error}
+              </p>
+            )}
+
+            <button disabled={isSubmitting} className="tm-button w-full">
+              {isSubmitting ? "Updating…" : "Update password"}
+            </button>
+
+            <div className="text-sm">
+              <Link href="/login" className="tm-link">
+                Back to login
+              </Link>
+            </div>
+          </form>
         </div>
-
-        <div>
-          <label className="text-sm font-medium">Token</label>
-          <input
-            className="mt-1 w-full rounded-md border px-3 py-2"
-            {...register("token")}
-          />
-          {errors.token && (
-            <p className="mt-1 text-sm text-red-600">{errors.token.message}</p>
-          )}
-        </div>
-
-        <div>
-          <label className="text-sm font-medium">New password</label>
-          <input
-            className="mt-1 w-full rounded-md border px-3 py-2"
-            type="password"
-            {...register("newPassword")}
-          />
-          {errors.newPassword && (
-            <p className="mt-1 text-sm text-red-600">
-              {errors.newPassword.message}
-            </p>
-          )}
-        </div>
-
-        {ok && (
-          <p className="rounded-md border border-green-200 bg-green-50 p-3 text-sm text-green-700">
-            Password updated.
-          </p>
-        )}
-        {error && (
-          <p className="rounded-md border border-red-200 bg-red-50 p-3 text-sm text-red-700">
-            {error}
-          </p>
-        )}
-
-        <button
-          disabled={isSubmitting}
-          className="w-full rounded-md bg-zinc-900 px-4 py-2 text-white hover:bg-black disabled:opacity-60"
-        >
-          {isSubmitting ? "Updating…" : "Update password"}
-        </button>
-
-        <div className="text-sm">
-          <Link href="/login" className="text-zinc-700 hover:underline">
-            Back to login
-          </Link>
-        </div>
-      </form>
+      </div>
     </main>
   );
 }

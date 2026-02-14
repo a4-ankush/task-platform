@@ -39,15 +39,13 @@ function Column({
     <div
       ref={setNodeRef}
       className={cx(
-        "flex min-w-70 flex-1 flex-col rounded-xl border bg-white transition",
-        isOver ? "ring-2 ring-zinc-900/20" : "",
+        "flex min-w-[18rem] flex-1 flex-col rounded-2xl border bg-white shadow-sm transition",
+        isOver ? "ring-2 ring-indigo-500/20" : "",
       )}
     >
-      <div className="flex items-center justify-between border-b px-4 py-3">
-        <h2 className="text-sm font-semibold">{title}</h2>
-        <span className="rounded-full bg-zinc-100 px-2 py-0.5 text-xs text-zinc-700">
-          {tasks.length}
-        </span>
+      <div className="flex items-center justify-between border-b bg-slate-50/70 px-4 py-3">
+        <h2 className="text-sm font-semibold text-slate-900">{title}</h2>
+        <span className="tm-badge bg-white text-slate-700">{tasks.length}</span>
       </div>
       <div className="flex flex-1 flex-col gap-3 p-3">
         {tasks.map((t) => (
@@ -74,35 +72,41 @@ function TaskCard({ task }: { task: Task }) {
       ref={setNodeRef}
       style={style}
       className={cx(
-        "cursor-grab rounded-lg border bg-white p-3 shadow-sm active:cursor-grabbing",
-        isDragging ? "opacity-60" : "",
+        "cursor-grab rounded-2xl border bg-white p-3 shadow-sm outline-none transition active:cursor-grabbing",
+        isDragging ? "opacity-60" : "hover:border-slate-300 hover:shadow-md",
       )}
       {...listeners}
       {...attributes}
     >
       <div className="flex items-start justify-between gap-2">
         <div>
-          <div className="text-sm font-medium">{task.title}</div>
+          <div className="text-sm font-semibold text-slate-900">
+            {task.title}
+          </div>
           {task.description ? (
-            <div className="mt-1 text-xs text-zinc-600">{task.description}</div>
+            <div className="mt-1 text-xs text-slate-600">
+              {task.description}
+            </div>
           ) : null}
         </div>
         <span
           className={cx(
-            "rounded-md px-2 py-0.5 text-xs",
+            "rounded-full border px-2 py-0.5 text-xs font-medium",
             task.priority === "high"
-              ? "bg-red-50 text-red-700"
+              ? "border-red-200 bg-red-50 text-red-700"
               : task.priority === "low"
-                ? "bg-emerald-50 text-emerald-700"
-                : "bg-amber-50 text-amber-700",
+                ? "border-emerald-200 bg-emerald-50 text-emerald-700"
+                : "border-amber-200 bg-amber-50 text-amber-700",
           )}
         >
           {task.priority}
         </span>
       </div>
-      <div className="mt-2 flex items-center justify-between text-xs text-zinc-500">
-        <span>{task.assignee ? `@${task.assignee.name}` : "Unassigned"}</span>
-        <span className="select-none">Drag</span>
+      <div className="mt-3 flex items-center justify-between text-xs text-slate-500">
+        <span className="truncate">
+          {task.assignee ? `@${task.assignee.name}` : "Unassigned"}
+        </span>
+        <span className="select-none">Hold &amp; drag</span>
       </div>
     </div>
   );
@@ -120,6 +124,7 @@ export default function BoardPage() {
   const [newPriority, setNewPriority] = useState<"low" | "medium" | "high">(
     "medium",
   );
+  const [socketConnected, setSocketConnected] = useState(false);
 
   const sensors = useSensors(
     useSensor(PointerSensor, { activationConstraint: { distance: 6 } }),
@@ -180,6 +185,23 @@ export default function BoardPage() {
       socket.off("task:created", onCreated);
       socket.off("task:updated", onUpdated);
       socket.off("task:deleted", onDeleted);
+    };
+  }, [socket]);
+
+  useEffect(() => {
+    if (!socket) {
+      setSocketConnected(false);
+      return;
+    }
+
+    const sync = () => setSocketConnected(Boolean(socket.connected));
+    sync();
+
+    socket.on("connect", sync);
+    socket.on("disconnect", sync);
+    return () => {
+      socket.off("connect", sync);
+      socket.off("disconnect", sync);
     };
   }, [socket]);
 
@@ -254,55 +276,87 @@ export default function BoardPage() {
 
   return (
     <Protected>
-      <main className="mx-auto max-w-6xl px-4 py-6">
-        <div className="flex items-start justify-between gap-4">
+      <main className="tm-container py-6">
+        <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
           <div>
-            <h1 className="text-2xl font-semibold">Kanban Board</h1>
-            <p className="mt-1 text-sm text-zinc-600">
-              Drag cards between columns. Changes sync in realtime.
+            <h1 className="text-2xl font-semibold tracking-tight text-slate-900">
+              Kanban Board
+            </h1>
+            <p className="mt-1 text-sm text-slate-600">
+              Drag cards between columns. Updates sync in realtime.
             </p>
+          </div>
+
+          <div className="flex flex-wrap items-center gap-2">
+            <span
+              className={cx(
+                "tm-badge bg-white",
+                socketConnected
+                  ? "border-emerald-200 text-emerald-700"
+                  : "border-amber-200 text-amber-700",
+              )}
+            >
+              <span
+                className={cx(
+                  "h-2 w-2 rounded-full",
+                  socketConnected ? "bg-emerald-500" : "bg-amber-500",
+                )}
+              />
+              Realtime: {socketConnected ? "Connected" : "Offline"}
+            </span>
+            <span className="tm-badge bg-white text-slate-700">
+              {tasks.length} tasks
+            </span>
           </div>
         </div>
 
-        <div className="mt-6 flex flex-col gap-3 rounded-xl border bg-white p-4 sm:flex-row sm:items-end">
-          <div className="flex-1">
-            <label className="text-sm font-medium">New task title</label>
-            <input
-              value={newTitle}
-              onChange={(e) => setNewTitle(e.target.value)}
-              className="mt-1 w-full rounded-md border px-3 py-2"
-              placeholder="e.g. Prepare release notes"
-            />
-          </div>
-          <div>
-            <label className="text-sm font-medium">Priority</label>
-            <select
-              value={newPriority}
-              onChange={(e) => setNewPriority(e.target.value as any)}
-              className="mt-1 w-full rounded-md border px-3 py-2"
+        <div className="tm-card mt-6 p-4 sm:p-5">
+          <div className="grid gap-3 sm:grid-cols-[1fr_200px_auto] sm:items-end">
+            <div>
+              <label className="text-sm font-medium text-slate-800">
+                New task title
+              </label>
+              <input
+                value={newTitle}
+                onChange={(e) => setNewTitle(e.target.value)}
+                className="tm-input mt-1"
+                placeholder="e.g. Prepare release notes"
+              />
+            </div>
+
+            <div>
+              <label className="text-sm font-medium text-slate-800">
+                Priority
+              </label>
+              <select
+                value={newPriority}
+                onChange={(e) => setNewPriority(e.target.value as any)}
+                className="tm-select mt-1"
+              >
+                <option value="low">low</option>
+                <option value="medium">medium</option>
+                <option value="high">high</option>
+              </select>
+            </div>
+
+            <button
+              disabled={creating}
+              onClick={createTask}
+              className="tm-button"
             >
-              <option value="low">low</option>
-              <option value="medium">medium</option>
-              <option value="high">high</option>
-            </select>
+              {creating ? "Creating…" : "Add task"}
+            </button>
           </div>
-          <button
-            disabled={creating}
-            onClick={createTask}
-            className="rounded-md bg-zinc-900 px-4 py-2 text-sm text-white hover:bg-black disabled:opacity-60"
-          >
-            {creating ? "Creating…" : "Add task"}
-          </button>
         </div>
 
         {error && (
-          <p className="mt-4 rounded-md border border-red-200 bg-red-50 p-3 text-sm text-red-700">
+          <p className="mt-4 rounded-xl border border-red-200 bg-red-50 p-3 text-sm text-red-700">
             {error}
           </p>
         )}
 
         {loading ? (
-          <div className="mt-6 text-sm text-zinc-600">Loading…</div>
+          <div className="mt-6 text-sm text-slate-600">Loading…</div>
         ) : (
           <DndContext sensors={sensors} onDragEnd={onDragEnd}>
             <div className="mt-6 flex gap-4 overflow-x-auto pb-2">
