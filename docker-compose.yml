@@ -19,11 +19,14 @@ services:
       - NODE_ENV=production
       - PORT=4000
       - MONGODB_URI=mongodb://mongo:27017/task_platform
-      - JWT_ACCESS_SECRET=change-me-access
-      - JWT_REFRESH_SECRET=change-me-refresh
+      # IMPORTANT: backend validates these are >= 16 chars.
+      # You can override via a local .env file or shell env vars.
+      - JWT_ACCESS_SECRET=${JWT_ACCESS_SECRET:-change-me-access-secret-min-16}
+      - JWT_REFRESH_SECRET=${JWT_REFRESH_SECRET:-change-me-refresh-secret-min-16}
       - JWT_ACCESS_EXPIRES_IN=15m
       - JWT_REFRESH_EXPIRES_IN=7d
       - CORS_ORIGIN=http://localhost:3000
+      - APP_BASE_URL=http://localhost:3000
     ports:
       - "4000:4000"
 

@@ -1,0 +1,16 @@
+node_modules
+.next
+out
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+.env*
+
+.git
+.gitignore
+
+.DS_Store
+
+# Optional: keep build context smaller
+coverage

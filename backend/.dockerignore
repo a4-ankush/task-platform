@@ -1,0 +1,17 @@
+node_modules
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+.env*
+
+.git
+.gitignore
+
+coverage
+.DS_Store
+
+# Not needed in runtime image
+__tests__
+*.test.js
+*.spec.js
