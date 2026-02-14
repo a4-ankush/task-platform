@@ -1,13 +1,19 @@
-const mongoose = require('mongoose');
-const bcrypt = require('bcryptjs');
+const mongoose = require("mongoose");
+const bcrypt = require("bcryptjs");
 
-const ROLES = ['admin', 'manager', 'user'];
+const ROLES = ["admin", "manager", "user"];
 
 const userSchema = new mongoose.Schema(
   {
-    email: { type: String, required: true, unique: true, lowercase: true, trim: true },
+    email: {
+      type: String,
+      required: true,
+      unique: true,
+      lowercase: true,
+      trim: true,
+    },
     name: { type: String, required: true, trim: true },
-    role: { type: String, enum: ROLES, default: 'user', index: true },
+    role: { type: String, enum: ROLES, default: "user", index: true },
     passwordHash: { type: String, required: true },
 
     // Refresh rotation
@@ -17,7 +23,7 @@ const userSchema = new mongoose.Schema(
     passwordResetTokenHash: { type: String, default: null },
     passwordResetExpiresAt: { type: Date, default: null },
   },
-  { timestamps: true }
+  { timestamps: true },
 );
 
 userSchema.methods.verifyPassword = async function verifyPassword(password) {
@@ -29,6 +35,6 @@ userSchema.statics.hashPassword = async function hashPassword(password) {
   return bcrypt.hash(password, salt);
 };
 
-const User = mongoose.model('User', userSchema);
+const User = mongoose.model("User", userSchema);
 
 module.exports = { User, ROLES };

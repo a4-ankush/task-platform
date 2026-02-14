@@ -1,12 +1,12 @@
-'use client';
+"use client";
 
-import { useMemo, useState } from 'react';
-import Link from 'next/link';
-import { useSearchParams, useRouter } from 'next/navigation';
-import { useForm } from 'react-hook-form';
-import { z } from 'zod';
-import { zodResolver } from '@hookform/resolvers/zod';
-import { useAuth } from '@/context/AuthContext';
+import { useMemo, useState } from "react";
+import Link from "next/link";
+import { useSearchParams, useRouter } from "next/navigation";
+import { useForm } from "react-hook-form";
+import { z } from "zod";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { useAuth } from "@/context/AuthContext";
 
 const schema = z.object({
   email: z.string().email(),
@@ -23,11 +23,11 @@ export default function ResetPasswordClient() {
 
   const defaults = useMemo(
     () => ({
-      email: search.get('email') || '',
-      token: search.get('token') || '',
-      newPassword: '',
+      email: search.get("email") || "",
+      token: search.get("token") || "",
+      newPassword: "",
     }),
-    [search]
+    [search],
   );
 
   const [error, setError] = useState<string | null>(null);
@@ -37,20 +37,23 @@ export default function ResetPasswordClient() {
     register,
     handleSubmit,
     formState: { errors, isSubmitting },
-  } = useForm<FormValues>({ resolver: zodResolver(schema), defaultValues: defaults });
+  } = useForm<FormValues>({
+    resolver: zodResolver(schema),
+    defaultValues: defaults,
+  });
 
   const onSubmit = async (values: FormValues) => {
     setError(null);
     setOk(false);
     try {
-      await apiFetch('/api/auth/reset-password', {
-        method: 'POST',
+      await apiFetch("/api/auth/reset-password", {
+        method: "POST",
         body: JSON.stringify(values),
       });
       setOk(true);
-      setTimeout(() => router.replace('/login'), 800);
+      setTimeout(() => router.replace("/login"), 800);
     } catch (e: any) {
-      setError(e?.message || 'Reset failed');
+      setError(e?.message || "Reset failed");
     }
   };
 
@@ -61,14 +64,25 @@ export default function ResetPasswordClient() {
       <form onSubmit={handleSubmit(onSubmit)} className="mt-6 space-y-4">
         <div>
           <label className="text-sm font-medium">Email</label>
-          <input className="mt-1 w-full rounded-md border px-3 py-2" type="email" {...register('email')} />
-          {errors.email && <p className="mt-1 text-sm text-red-600">{errors.email.message}</p>}
+          <input
+            className="mt-1 w-full rounded-md border px-3 py-2"
+            type="email"
+            {...register("email")}
+          />
+          {errors.email && (
+            <p className="mt-1 text-sm text-red-600">{errors.email.message}</p>
+          )}
         </div>
 
         <div>
           <label className="text-sm font-medium">Token</label>
-          <input className="mt-1 w-full rounded-md border px-3 py-2" {...register('token')} />
-          {errors.token && <p className="mt-1 text-sm text-red-600">{errors.token.message}</p>}
+          <input
+            className="mt-1 w-full rounded-md border px-3 py-2"
+            {...register("token")}
+          />
+          {errors.token && (
+            <p className="mt-1 text-sm text-red-600">{errors.token.message}</p>
+          )}
         </div>
 
         <div>
@@ -76,9 +90,13 @@ export default function ResetPasswordClient() {
           <input
             className="mt-1 w-full rounded-md border px-3 py-2"
             type="password"
-            {...register('newPassword')}
+            {...register("newPassword")}
           />
-          {errors.newPassword && <p className="mt-1 text-sm text-red-600">{errors.newPassword.message}</p>}
+          {errors.newPassword && (
+            <p className="mt-1 text-sm text-red-600">
+              {errors.newPassword.message}
+            </p>
+          )}
         </div>
 
         {ok && (
@@ -86,13 +104,17 @@ export default function ResetPasswordClient() {
             Password updated.
           </p>
         )}
-        {error && <p className="rounded-md border border-red-200 bg-red-50 p-3 text-sm text-red-700">{error}</p>}
+        {error && (
+          <p className="rounded-md border border-red-200 bg-red-50 p-3 text-sm text-red-700">
+            {error}
+          </p>
+        )}
 
         <button
           disabled={isSubmitting}
           className="w-full rounded-md bg-zinc-900 px-4 py-2 text-white hover:bg-black disabled:opacity-60"
         >
-          {isSubmitting ? 'Updating…' : 'Update password'}
+          {isSubmitting ? "Updating…" : "Update password"}
         </button>
 
         <div className="text-sm">

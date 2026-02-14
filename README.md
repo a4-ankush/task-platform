@@ -120,5 +120,6 @@ docker compose up --build
 ## Environment variables
 
 See:
+
 - `backend/.env.example`
 - `frontend/.env.example`

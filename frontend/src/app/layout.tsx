@@ -20,7 +20,8 @@ export const metadata: Metadata = {
     default: "Task Management Platform",
     template: "%s | Task Management Platform",
   },
-  description: "Secure task management with RBAC, a Kanban board, and realtime updates.",
+  description:
+    "Secure task management with RBAC, a Kanban board, and realtime updates.",
 };
 
 export default function RootLayout({

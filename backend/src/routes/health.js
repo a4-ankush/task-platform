@@ -1,8 +1,8 @@
-const express = require('express');
+const express = require("express");
 
 const router = express.Router();
 
-router.get('/health', (_req, res) => {
+router.get("/health", (_req, res) => {
   res.json({ ok: true });
 });
 

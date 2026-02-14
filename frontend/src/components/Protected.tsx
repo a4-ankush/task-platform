@@ -1,9 +1,9 @@
-'use client';
+"use client";
 
-import { useEffect } from 'react';
-import { useRouter } from 'next/navigation';
-import type { Role } from '@/lib/types';
-import { useAuth } from '@/context/AuthContext';
+import { useEffect } from "react";
+import { useRouter } from "next/navigation";
+import type { Role } from "@/lib/types";
+import { useAuth } from "@/context/AuthContext";
 
 export function Protected({
   children,
@@ -18,11 +18,11 @@ export function Protected({
   useEffect(() => {
     if (loading) return;
     if (!user) {
-      router.replace('/login');
+      router.replace("/login");
       return;
     }
     if (roles && roles.length > 0 && !roles.includes(user.role)) {
-      router.replace('/board');
+      router.replace("/board");
     }
   }, [loading, roles, router, user]);
 

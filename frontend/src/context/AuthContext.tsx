@@ -1,8 +1,16 @@
-'use client';
+"use client";
 
-import React, { createContext, useCallback, useContext, useEffect, useMemo, useRef, useState } from 'react';
-import { getEnv } from '@/lib/env';
-import type { Role, User } from '@/lib/types';
+import React, {
+  createContext,
+  useCallback,
+  useContext,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from "react";
+import { getEnv } from "@/lib/env";
+import type { Role, User } from "@/lib/types";
 
 type AuthState = {
   user: User | null;
@@ -15,7 +23,7 @@ type ApiErrorPayload = { error?: { message?: string } };
 type ApiFetch = <T>(
   path: string,
   init?: RequestInit,
-  opts?: { retryOnUnauthorized?: boolean }
+  opts?: { retryOnUnauthorized?: boolean },
 ) => Promise<T>;
 
 type AuthContextValue = AuthState & {
@@ -28,7 +36,7 @@ type AuthContextValue = AuthState & {
 
 const AuthContext = createContext<AuthContextValue | null>(null);
 
-const ACCESS_TOKEN_KEY = 'accessToken';
+const ACCESS_TOKEN_KEY = "accessToken";
 
 async function readErrorMessage(res: Response): Promise<string> {
   try {
@@ -49,7 +57,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   const persistAccessToken = useCallback((token: string | null) => {
     setAccessToken(token);
-    if (typeof window !== 'undefined') {
+    if (typeof window !== "undefined") {
       if (token) localStorage.setItem(ACCESS_TOKEN_KEY, token);
       else localStorage.removeItem(ACCESS_TOKEN_KEY);
     }
@@ -60,8 +68,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
     refreshingRef.current = (async () => {
       const res = await fetch(`${apiUrl}/api/auth/refresh`, {
-        method: 'POST',
-        credentials: 'include',
+        method: "POST",
+        credentials: "include",
       });
 
       if (!res.ok) return null;
@@ -77,23 +85,24 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   const apiFetch = useCallback<ApiFetch>(
     async (path, init, opts) => {
-      const url = path.startsWith('http') ? path : `${apiUrl}${path}`;
+      const url = path.startsWith("http") ? path : `${apiUrl}${path}`;
       const retryOnUnauthorized = opts?.retryOnUnauthorized ?? true;
 
       const doFetch = async (token: string | null) => {
         const headers = new Headers(init?.headers || {});
-        if (token) headers.set('Authorization', `Bearer ${token}`);
-        if (!headers.has('Content-Type') && init?.body) headers.set('Content-Type', 'application/json');
+        if (token) headers.set("Authorization", `Bearer ${token}`);
+        if (!headers.has("Content-Type") && init?.body)
+          headers.set("Content-Type", "application/json");
 
         const res = await fetch(url, {
           ...init,
           headers,
-          credentials: 'include',
+          credentials: "include",
         });
 
         if (res.ok) {
-          const ct = res.headers.get('content-type') || '';
-          if (ct.includes('application/json')) return (await res.json()) as any;
+          const ct = res.headers.get("content-type") || "";
+          if (ct.includes("application/json")) return (await res.json()) as any;
           return (await res.text()) as any;
         }
 
@@ -108,26 +117,29 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
       return doFetch(accessToken);
     },
-    [accessToken, apiUrl, refresh]
+    [accessToken, apiUrl, refresh],
   );
 
   const fetchMe = useCallback(
     async (token: string) => {
       const res = await fetch(`${apiUrl}/api/auth/me`, {
         headers: { Authorization: `Bearer ${token}` },
-        credentials: 'include',
+        credentials: "include",
       });
       if (!res.ok) throw new Error(await readErrorMessage(res));
       const data = (await res.json()) as { user: User };
       setUser(data.user);
     },
-    [apiUrl]
+    [apiUrl],
   );
 
   useEffect(() => {
     const init = async () => {
       try {
-        const stored = typeof window !== 'undefined' ? localStorage.getItem(ACCESS_TOKEN_KEY) : null;
+        const stored =
+          typeof window !== "undefined"
+            ? localStorage.getItem(ACCESS_TOKEN_KEY)
+            : null;
         if (stored) {
           persistAccessToken(stored);
           try {
@@ -152,10 +164,10 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const login = useCallback(
     async (email: string, password: string) => {
       const res = await fetch(`${apiUrl}/api/auth/login`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ email, password }),
-        credentials: 'include',
+        credentials: "include",
       });
 
       if (!res.ok) throw new Error(await readErrorMessage(res));
@@ -163,16 +175,16 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       persistAccessToken(data.accessToken);
       setUser(data.user);
     },
-    [apiUrl, persistAccessToken]
+    [apiUrl, persistAccessToken],
   );
 
   const signup = useCallback(
     async (email: string, name: string, password: string) => {
       const res = await fetch(`${apiUrl}/api/auth/signup`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ email, name, password }),
-        credentials: 'include',
+        credentials: "include",
       });
 
       if (!res.ok) throw new Error(await readErrorMessage(res));
@@ -180,14 +192,14 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       persistAccessToken(data.accessToken);
       setUser(data.user);
     },
-    [apiUrl, persistAccessToken]
+    [apiUrl, persistAccessToken],
   );
 
   const logout = useCallback(async () => {
     try {
       await fetch(`${apiUrl}/api/auth/logout`, {
-        method: 'POST',
-        credentials: 'include',
+        method: "POST",
+        credentials: "include",
       });
     } finally {
       persistAccessToken(null);
@@ -200,7 +212,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       if (!user) return false;
       return roles.includes(user.role);
     },
-    [user]
+    [user],
   );
 
   const value = useMemo<AuthContextValue>(
@@ -214,7 +226,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       apiFetch,
       hasRole,
     }),
-    [user, accessToken, loading, login, signup, logout, apiFetch, hasRole]
+    [user, accessToken, loading, login, signup, logout, apiFetch, hasRole],
   );
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
@@ -222,6 +234,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
 export function useAuth() {
   const ctx = useContext(AuthContext);
-  if (!ctx) throw new Error('useAuth must be used within AuthProvider');
+  if (!ctx) throw new Error("useAuth must be used within AuthProvider");
   return ctx;
 }

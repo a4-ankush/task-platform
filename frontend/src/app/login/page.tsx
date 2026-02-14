@@ -1,12 +1,12 @@
-'use client';
+"use client";
 
-import { useState } from 'react';
-import Link from 'next/link';
-import { useRouter } from 'next/navigation';
-import { useForm } from 'react-hook-form';
-import { z } from 'zod';
-import { zodResolver } from '@hookform/resolvers/zod';
-import { useAuth } from '@/context/AuthContext';
+import { useState } from "react";
+import Link from "next/link";
+import { useRouter } from "next/navigation";
+import { useForm } from "react-hook-form";
+import { z } from "zod";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { useAuth } from "@/context/AuthContext";
 
 const schema = z.object({
   email: z.string().email(),
@@ -30,9 +30,9 @@ export default function LoginPage() {
     setError(null);
     try {
       await login(values.email, values.password);
-      router.replace('/board');
+      router.replace("/board");
     } catch (e: any) {
-      setError(e?.message || 'Login failed');
+      setError(e?.message || "Login failed");
     }
   };
 
@@ -47,9 +47,11 @@ export default function LoginPage() {
           <input
             className="mt-1 w-full rounded-md border px-3 py-2"
             type="email"
-            {...register('email')}
+            {...register("email")}
           />
-          {errors.email && <p className="mt-1 text-sm text-red-600">{errors.email.message}</p>}
+          {errors.email && (
+            <p className="mt-1 text-sm text-red-600">{errors.email.message}</p>
+          )}
         </div>
 
         <div>
@@ -57,22 +59,33 @@ export default function LoginPage() {
           <input
             className="mt-1 w-full rounded-md border px-3 py-2"
             type="password"
-            {...register('password')}
+            {...register("password")}
           />
-          {errors.password && <p className="mt-1 text-sm text-red-600">{errors.password.message}</p>}
+          {errors.password && (
+            <p className="mt-1 text-sm text-red-600">
+              {errors.password.message}
+            </p>
+          )}
         </div>
 
-        {error && <p className="rounded-md border border-red-200 bg-red-50 p-3 text-sm text-red-700">{error}</p>}
+        {error && (
+          <p className="rounded-md border border-red-200 bg-red-50 p-3 text-sm text-red-700">
+            {error}
+          </p>
+        )}
 
         <button
           disabled={isSubmitting}
           className="w-full rounded-md bg-zinc-900 px-4 py-2 text-white hover:bg-black disabled:opacity-60"
         >
-          {isSubmitting ? 'Signing in…' : 'Sign in'}
+          {isSubmitting ? "Signing in…" : "Sign in"}
         </button>
 
         <div className="flex items-center justify-between text-sm">
-          <Link href="/forgot-password" className="text-zinc-700 hover:underline">
+          <Link
+            href="/forgot-password"
+            className="text-zinc-700 hover:underline"
+          >
             Forgot password?
           </Link>
           <Link href="/signup" className="text-zinc-700 hover:underline">

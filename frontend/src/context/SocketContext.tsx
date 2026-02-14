@@ -1,9 +1,16 @@
-'use client';
+"use client";
 
-import React, { createContext, useContext, useEffect, useMemo, useRef, useState } from 'react';
-import { io, type Socket } from 'socket.io-client';
-import { getEnv } from '@/lib/env';
-import { useAuth } from '@/context/AuthContext';
+import React, {
+  createContext,
+  useContext,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from "react";
+import { io, type Socket } from "socket.io-client";
+import { getEnv } from "@/lib/env";
+import { useAuth } from "@/context/AuthContext";
 
 type SocketContextValue = {
   socket: Socket | null;
@@ -29,7 +36,7 @@ export function SocketProvider({ children }: { children: React.ReactNode }) {
 
     const socket = io(wsUrl, {
       auth: { token: accessToken },
-      transports: ['websocket'],
+      transports: ["websocket"],
     });
 
     socketRef.current = socket;
@@ -43,11 +50,13 @@ export function SocketProvider({ children }: { children: React.ReactNode }) {
   }, [accessToken, wsUrl]);
 
   const value = useMemo(() => ({ socket }), [socket]);
-  return <SocketContext.Provider value={value}>{children}</SocketContext.Provider>;
+  return (
+    <SocketContext.Provider value={value}>{children}</SocketContext.Provider>
+  );
 }
 
 export function useSocket() {
   const ctx = useContext(SocketContext);
-  if (!ctx) throw new Error('useSocket must be used within SocketProvider');
+  if (!ctx) throw new Error("useSocket must be used within SocketProvider");
   return ctx;
 }

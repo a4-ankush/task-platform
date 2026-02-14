@@ -1,4 +1,4 @@
-export type Role = 'admin' | 'manager' | 'user';
+export type Role = "admin" | "manager" | "user";
 
 export type User = {
   id: string;
@@ -7,8 +7,8 @@ export type User = {
   role: Role;
 };
 
-export type TaskStatus = 'todo' | 'in-progress' | 'done';
-export type TaskPriority = 'low' | 'medium' | 'high';
+export type TaskStatus = "todo" | "in-progress" | "done";
+export type TaskPriority = "low" | "medium" | "high";
 
 export type Task = {
   id: string;
@@ -36,13 +36,13 @@ export function normalizeTask(input: any): Task {
 
   return {
     id,
-    title: String(input.title ?? ''),
-    description: String(input.description ?? ''),
+    title: String(input.title ?? ""),
+    description: String(input.description ?? ""),
     status: input.status as TaskStatus,
-    priority: (input.priority ?? 'medium') as TaskPriority,
+    priority: (input.priority ?? "medium") as TaskPriority,
     dueDate: input.dueDate ? String(input.dueDate) : null,
     assignee,
-    createdBy: String(input.createdBy ?? ''),
+    createdBy: String(input.createdBy ?? ""),
     createdAt: String(input.createdAt ?? new Date().toISOString()),
     updatedAt: String(input.updatedAt ?? new Date().toISOString()),
   };

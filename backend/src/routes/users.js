@@ -1,19 +1,19 @@
-const express = require('express');
-const { z } = require('zod');
+const express = require("express");
+const { z } = require("zod");
 
-const { asyncHandler } = require('../utils/asyncHandler');
-const { ApiError } = require('../utils/apiError');
-const { requireAuth } = require('../middleware/auth');
-const { requireRole } = require('../middleware/rbac');
-const { User, ROLES } = require('../models/User');
+const { asyncHandler } = require("../utils/asyncHandler");
+const { ApiError } = require("../utils/apiError");
+const { requireAuth } = require("../middleware/auth");
+const { requireRole } = require("../middleware/rbac");
+const { User, ROLES } = require("../models/User");
 
 const router = express.Router();
 
 router.use(requireAuth);
 
 router.get(
-  '/',
-  requireRole('admin', 'manager'),
+  "/",
+  requireRole("admin", "manager"),
   asyncHandler(async (req, res) => {
     const query = z
       .object({
@@ -21,8 +21,10 @@ router.get(
         limit: z.coerce.number().int().min(1).max(100).default(20),
         q: z.string().optional(),
         role: z.enum(ROLES).optional(),
-        sortBy: z.enum(['createdAt', 'email', 'name', 'role']).default('createdAt'),
-        sortOrder: z.enum(['asc', 'desc']).default('desc'),
+        sortBy: z
+          .enum(["createdAt", "email", "name", "role"])
+          .default("createdAt"),
+        sortOrder: z.enum(["asc", "desc"]).default("desc"),
       })
       .parse(req.query);
 
@@ -30,12 +32,12 @@ router.get(
     if (query.role) filter.role = query.role;
     if (query.q) {
       filter.$or = [
-        { email: { $regex: query.q, $options: 'i' } },
-        { name: { $regex: query.q, $options: 'i' } },
+        { email: { $regex: query.q, $options: "i" } },
+        { name: { $regex: query.q, $options: "i" } },
       ];
     }
 
-    const sort = { [query.sortBy]: query.sortOrder === 'asc' ? 1 : -1 };
+    const sort = { [query.sortBy]: query.sortOrder === "asc" ? 1 : -1 };
     const skip = (query.page - 1) * query.limit;
 
     const [items, total] = await Promise.all([
@@ -44,17 +46,22 @@ router.get(
     ]);
 
     res.json({
-      items: items.map((u) => ({ id: String(u._id), email: u.email, name: u.name, role: u.role })),
+      items: items.map((u) => ({
+        id: String(u._id),
+        email: u.email,
+        name: u.name,
+        role: u.role,
+      })),
       page: query.page,
       limit: query.limit,
       total,
     });
-  })
+  }),
 );
 
 router.post(
-  '/',
-  requireRole('admin'),
+  "/",
+  requireRole("admin"),
   asyncHandler(async (req, res) => {
     const body = z
       .object({
@@ -66,7 +73,7 @@ router.post(
       .parse(req.body);
 
     const existing = await User.findOne({ email: body.email });
-    if (existing) throw new ApiError(409, 'Email already registered');
+    if (existing) throw new ApiError(409, "Email already registered");
 
     const passwordHash = await User.hashPassword(body.password);
     const user = await User.create({
@@ -77,14 +84,19 @@ router.post(
     });
 
     res.status(201).json({
-      user: { id: String(user._id), email: user.email, name: user.name, role: user.role },
+      user: {
+        id: String(user._id),
+        email: user.email,
+        name: user.name,
+        role: user.role,
+      },
     });
-  })
+  }),
 );
 
 router.patch(
-  '/:id',
-  requireRole('admin'),
+  "/:id",
+  requireRole("admin"),
   asyncHandler(async (req, res) => {
     const params = z.object({ id: z.string().min(1) }).parse(req.params);
     const body = z
@@ -95,14 +107,21 @@ router.patch(
       .parse(req.body);
 
     const user = await User.findById(params.id);
-    if (!user) throw new ApiError(404, 'User not found');
+    if (!user) throw new ApiError(404, "User not found");
 
     if (body.name !== undefined) user.name = body.name;
     if (body.role !== undefined) user.role = body.role;
     await user.save();
 
-    res.json({ user: { id: String(user._id), email: user.email, name: user.name, role: user.role } });
-  })
+    res.json({
+      user: {
+        id: String(user._id),
+        email: user.email,
+        name: user.name,
+        role: user.role,
+      },
+    });
+  }),
 );
 
 module.exports = { router };

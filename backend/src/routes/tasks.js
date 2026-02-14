@@ -1,17 +1,17 @@
-const express = require('express');
-const { z } = require('zod');
+const express = require("express");
+const { z } = require("zod");
 
-const { asyncHandler } = require('../utils/asyncHandler');
-const { ApiError } = require('../utils/apiError');
-const { requireAuth } = require('../middleware/auth');
-const { Task, STATUSES, PRIORITIES } = require('../models/Task');
-const { emitTaskEvent } = require('../realtime/socket');
+const { asyncHandler } = require("../utils/asyncHandler");
+const { ApiError } = require("../utils/apiError");
+const { requireAuth } = require("../middleware/auth");
+const { Task, STATUSES, PRIORITIES } = require("../models/Task");
+const { emitTaskEvent } = require("../realtime/socket");
 
 const router = express.Router();
 router.use(requireAuth);
 
 function getVisibilityFilter(user) {
-  if (user.role === 'admin' || user.role === 'manager') {
+  if (user.role === "admin" || user.role === "manager") {
     return { deletedAt: null };
   }
   return {
@@ -21,7 +21,7 @@ function getVisibilityFilter(user) {
 }
 
 router.get(
-  '/',
+  "/",
   asyncHandler(async (req, res) => {
     const query = z
       .object({
@@ -32,8 +32,10 @@ router.get(
         createdBy: z.string().optional(),
         priority: z.enum(PRIORITIES).optional(),
         q: z.string().optional(),
-        sortBy: z.enum(['createdAt', 'updatedAt', 'dueDate', 'priority', 'status']).default('updatedAt'),
-        sortOrder: z.enum(['asc', 'desc']).default('desc'),
+        sortBy: z
+          .enum(["createdAt", "updatedAt", "dueDate", "priority", "status"])
+          .default("updatedAt"),
+        sortOrder: z.enum(["asc", "desc"]).default("desc"),
       })
       .parse(req.query);
 
@@ -48,11 +50,16 @@ router.get(
       filter.$text = { $search: query.q };
     }
 
-    const sort = { [query.sortBy]: query.sortOrder === 'asc' ? 1 : -1 };
+    const sort = { [query.sortBy]: query.sortOrder === "asc" ? 1 : -1 };
     const skip = (query.page - 1) * query.limit;
 
     const [items, total] = await Promise.all([
-      Task.find(filter).sort(sort).skip(skip).limit(query.limit).populate('assignee', 'email name role').lean(),
+      Task.find(filter)
+        .sort(sort)
+        .skip(skip)
+        .limit(query.limit)
+        .populate("assignee", "email name role")
+        .lean(),
       Task.countDocuments(filter),
     ]);
 
@@ -65,7 +72,12 @@ router.get(
         priority: t.priority,
         dueDate: t.dueDate,
         assignee: t.assignee
-          ? { id: String(t.assignee._id), email: t.assignee.email, name: t.assignee.name, role: t.assignee.role }
+          ? {
+              id: String(t.assignee._id),
+              email: t.assignee.email,
+              name: t.assignee.name,
+              role: t.assignee.role,
+            }
           : null,
         createdBy: String(t.createdBy),
         createdAt: t.createdAt,
@@ -75,11 +87,11 @@ router.get(
       limit: query.limit,
       total,
     });
-  })
+  }),
 );
 
 router.post(
-  '/',
+  "/",
   asyncHandler(async (req, res) => {
     const body = z
       .object({
@@ -94,36 +106,36 @@ router.post(
 
     const assignee = body.assignee ?? null;
 
-    if (req.user.role === 'user') {
+    if (req.user.role === "user") {
       if (assignee && assignee !== req.user.id) {
-        throw new ApiError(403, 'Users can only assign tasks to themselves');
+        throw new ApiError(403, "Users can only assign tasks to themselves");
       }
     }
 
     const task = await Task.create({
       title: body.title,
-      description: body.description ?? '',
-      status: body.status ?? 'todo',
-      priority: body.priority ?? 'medium',
+      description: body.description ?? "",
+      status: body.status ?? "todo",
+      priority: body.priority ?? "medium",
       dueDate: body.dueDate ?? null,
       assignee,
       createdBy: req.user.id,
     });
 
-    const io = req.app.get('io');
+    const io = req.app.get("io");
     if (io) {
       const full = await Task.findById(task._id)
-        .populate('assignee', 'email name role')
+        .populate("assignee", "email name role")
         .lean();
-      emitTaskEvent(io, 'created', full);
+      emitTaskEvent(io, "created", full);
     }
 
     res.status(201).json({ id: String(task._id) });
-  })
+  }),
 );
 
 router.patch(
-  '/:id',
+  "/:id",
   asyncHandler(async (req, res) => {
     const params = z.object({ id: z.string().min(1) }).parse(req.params);
     const body = z
@@ -139,11 +151,11 @@ router.patch(
 
     const visibility = getVisibilityFilter(req.user);
     const task = await Task.findOne({ _id: params.id, ...visibility });
-    if (!task) throw new ApiError(404, 'Task not found');
+    if (!task) throw new ApiError(404, "Task not found");
 
-    if (req.user.role === 'user') {
+    if (req.user.role === "user") {
       if (body.assignee && body.assignee !== req.user.id) {
-        throw new ApiError(403, 'Users can only assign tasks to themselves');
+        throw new ApiError(403, "Users can only assign tasks to themselves");
       }
     }
 
@@ -156,33 +168,33 @@ router.patch(
 
     await task.save();
 
-    const io = req.app.get('io');
+    const io = req.app.get("io");
     if (io) {
       const full = await Task.findById(task._id)
-        .populate('assignee', 'email name role')
+        .populate("assignee", "email name role")
         .lean();
-      emitTaskEvent(io, 'updated', full);
+      emitTaskEvent(io, "updated", full);
     }
 
     res.json({ ok: true });
-  })
+  }),
 );
 
 router.delete(
-  '/:id',
+  "/:id",
   asyncHandler(async (req, res) => {
     const params = z.object({ id: z.string().min(1) }).parse(req.params);
 
     const visibility = getVisibilityFilter(req.user);
     const task = await Task.findOne({ _id: params.id, ...visibility });
-    if (!task) throw new ApiError(404, 'Task not found');
+    if (!task) throw new ApiError(404, "Task not found");
 
     task.deletedAt = new Date();
     await task.save();
 
-    const io = req.app.get('io');
+    const io = req.app.get("io");
     if (io) {
-      emitTaskEvent(io, 'deleted', {
+      emitTaskEvent(io, "deleted", {
         _id: task._id,
         deletedAt: task.deletedAt,
         assignee: task.assignee,
@@ -190,7 +202,7 @@ router.delete(
     }
 
     res.json({ ok: true });
-  })
+  }),
 );
 
 module.exports = { router };

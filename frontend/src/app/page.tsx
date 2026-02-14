@@ -17,10 +17,15 @@ export default function Home() {
   return (
     <main className="mx-auto max-w-3xl px-4 py-10">
       <h1 className="text-3xl font-semibold">Task Management Platform</h1>
-      <p className="mt-2 text-zinc-600">Secure auth, RBAC, Kanban board, and realtime updates.</p>
+      <p className="mt-2 text-zinc-600">
+        Secure auth, RBAC, Kanban board, and realtime updates.
+      </p>
 
       <div className="mt-6 flex gap-3">
-        <Link className="rounded-md bg-zinc-900 px-4 py-2 text-white" href="/login">
+        <Link
+          className="rounded-md bg-zinc-900 px-4 py-2 text-white"
+          href="/login"
+        >
           Login
         </Link>
         <Link className="rounded-md border px-4 py-2" href="/signup">
@@ -29,5 +34,4 @@ export default function Home() {
       </div>
     </main>
   );
-
 }

@@ -1,5 +1,5 @@
-const jwt = require('jsonwebtoken');
-const { loadEnv } = require('../config/env');
+const jwt = require("jsonwebtoken");
+const { loadEnv } = require("../config/env");
 
 function registerSocket(io) {
   const env = loadEnv();
@@ -7,24 +7,28 @@ function registerSocket(io) {
   io.use((socket, next) => {
     try {
       const token = socket.handshake.auth?.token;
-      if (!token) return next(new Error('Missing access token'));
+      if (!token) return next(new Error("Missing access token"));
       const payload = jwt.verify(token, env.JWT_ACCESS_SECRET);
       socket.user = { id: String(payload.sub), role: payload.role };
       socket.join(`user:${socket.user.id}`);
       next();
     } catch {
-      next(new Error('Invalid access token'));
+      next(new Error("Invalid access token"));
     }
   });
 
-  io.on('connection', (socket) => {
-    socket.on('ping', () => socket.emit('pong'));
+  io.on("connection", (socket) => {
+    socket.on("ping", () => socket.emit("pong"));
   });
 }
 
 function emitTaskEvent(io, event, task) {
   io.emit(`task:${event}`, task);
-  const assigneeId = task?.assignee?._id ? String(task.assignee._id) : task?.assignee ? String(task.assignee) : null;
+  const assigneeId = task?.assignee?._id
+    ? String(task.assignee._id)
+    : task?.assignee
+      ? String(task.assignee)
+      : null;
   if (assigneeId) io.to(`user:${assigneeId}`).emit(`task:${event}`, task);
 }
 

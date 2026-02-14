@@ -1,20 +1,27 @@
-'use client';
+"use client";
 
-import { useEffect, useMemo, useState } from 'react';
-import { DndContext, PointerSensor, useDraggable, useDroppable, useSensor, useSensors } from '@dnd-kit/core';
-import type { DragEndEvent } from '@dnd-kit/core';
-import { CSS } from '@dnd-kit/utilities';
-import { useAuth } from '@/context/AuthContext';
-import { useSocket } from '@/context/SocketContext';
-import { Protected } from '@/components/Protected';
-import type { Task, TaskStatus } from '@/lib/types';
-import { normalizeTask } from '@/lib/types';
-import { cx } from '@/lib/utils';
+import { useEffect, useMemo, useState } from "react";
+import {
+  DndContext,
+  PointerSensor,
+  useDraggable,
+  useDroppable,
+  useSensor,
+  useSensors,
+} from "@dnd-kit/core";
+import type { DragEndEvent } from "@dnd-kit/core";
+import { CSS } from "@dnd-kit/utilities";
+import { useAuth } from "@/context/AuthContext";
+import { useSocket } from "@/context/SocketContext";
+import { Protected } from "@/components/Protected";
+import type { Task, TaskStatus } from "@/lib/types";
+import { normalizeTask } from "@/lib/types";
+import { cx } from "@/lib/utils";
 
 const STATUSES: Array<{ key: TaskStatus; label: string }> = [
-  { key: 'todo', label: 'Todo' },
-  { key: 'in-progress', label: 'In Progress' },
-  { key: 'done', label: 'Done' },
+  { key: "todo", label: "Todo" },
+  { key: "in-progress", label: "In Progress" },
+  { key: "done", label: "Done" },
 ];
 
 function Column({
@@ -32,13 +39,15 @@ function Column({
     <div
       ref={setNodeRef}
       className={cx(
-        'flex min-w-[280px] flex-1 flex-col rounded-xl border bg-white transition',
-        isOver ? 'ring-2 ring-zinc-900/20' : ''
+        "flex min-w-[280px] flex-1 flex-col rounded-xl border bg-white transition",
+        isOver ? "ring-2 ring-zinc-900/20" : "",
       )}
     >
       <div className="flex items-center justify-between border-b px-4 py-3">
         <h2 className="text-sm font-semibold">{title}</h2>
-        <span className="rounded-full bg-zinc-100 px-2 py-0.5 text-xs text-zinc-700">{tasks.length}</span>
+        <span className="rounded-full bg-zinc-100 px-2 py-0.5 text-xs text-zinc-700">
+          {tasks.length}
+        </span>
       </div>
       <div className="flex flex-1 flex-col gap-3 p-3">
         {tasks.map((t) => (
@@ -50,13 +59,14 @@ function Column({
 }
 
 function TaskCard({ task }: { task: Task }) {
-  const { attributes, listeners, setNodeRef, transform, isDragging } = useDraggable({
-    id: task.id,
-  });
+  const { attributes, listeners, setNodeRef, transform, isDragging } =
+    useDraggable({
+      id: task.id,
+    });
 
   const style: React.CSSProperties = {
     transform: CSS.Translate.toString(transform),
-    transition: isDragging ? undefined : 'transform 180ms ease',
+    transition: isDragging ? undefined : "transform 180ms ease",
   };
 
   return (
@@ -64,8 +74,8 @@ function TaskCard({ task }: { task: Task }) {
       ref={setNodeRef}
       style={style}
       className={cx(
-        'cursor-grab rounded-lg border bg-white p-3 shadow-sm active:cursor-grabbing',
-        isDragging ? 'opacity-60' : ''
+        "cursor-grab rounded-lg border bg-white p-3 shadow-sm active:cursor-grabbing",
+        isDragging ? "opacity-60" : "",
       )}
       {...listeners}
       {...attributes}
@@ -73,23 +83,25 @@ function TaskCard({ task }: { task: Task }) {
       <div className="flex items-start justify-between gap-2">
         <div>
           <div className="text-sm font-medium">{task.title}</div>
-          {task.description ? <div className="mt-1 text-xs text-zinc-600">{task.description}</div> : null}
+          {task.description ? (
+            <div className="mt-1 text-xs text-zinc-600">{task.description}</div>
+          ) : null}
         </div>
         <span
           className={cx(
-            'rounded-md px-2 py-0.5 text-xs',
-            task.priority === 'high'
-              ? 'bg-red-50 text-red-700'
-              : task.priority === 'low'
-                ? 'bg-emerald-50 text-emerald-700'
-                : 'bg-amber-50 text-amber-700'
+            "rounded-md px-2 py-0.5 text-xs",
+            task.priority === "high"
+              ? "bg-red-50 text-red-700"
+              : task.priority === "low"
+                ? "bg-emerald-50 text-emerald-700"
+                : "bg-amber-50 text-amber-700",
           )}
         >
           {task.priority}
         </span>
       </div>
       <div className="mt-2 flex items-center justify-between text-xs text-zinc-500">
-        <span>{task.assignee ? `@${task.assignee.name}` : 'Unassigned'}</span>
+        <span>{task.assignee ? `@${task.assignee.name}` : "Unassigned"}</span>
         <span className="select-none">Drag</span>
       </div>
     </div>
@@ -104,13 +116,21 @@ export default function BoardPage() {
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
   const [creating, setCreating] = useState(false);
-  const [newTitle, setNewTitle] = useState('');
-  const [newPriority, setNewPriority] = useState<'low' | 'medium' | 'high'>('medium');
+  const [newTitle, setNewTitle] = useState("");
+  const [newPriority, setNewPriority] = useState<"low" | "medium" | "high">(
+    "medium",
+  );
 
-  const sensors = useSensors(useSensor(PointerSensor, { activationConstraint: { distance: 6 } }));
+  const sensors = useSensors(
+    useSensor(PointerSensor, { activationConstraint: { distance: 6 } }),
+  );
 
   const grouped = useMemo(() => {
-    const by: Record<TaskStatus, Task[]> = { todo: [], 'in-progress': [], done: [] };
+    const by: Record<TaskStatus, Task[]> = {
+      todo: [],
+      "in-progress": [],
+      done: [],
+    };
     for (const t of tasks) by[t.status].push(t);
     return by;
   }, [tasks]);
@@ -120,10 +140,10 @@ export default function BoardPage() {
       setLoading(true);
       setError(null);
       try {
-        const data = await apiFetch<{ items: any[] }>('/api/tasks?limit=100');
+        const data = await apiFetch<{ items: any[] }>("/api/tasks?limit=100");
         setTasks(data.items.map(normalizeTask));
       } catch (e: any) {
-        setError(e?.message || 'Failed to load tasks');
+        setError(e?.message || "Failed to load tasks");
       } finally {
         setLoading(false);
       }
@@ -137,7 +157,9 @@ export default function BoardPage() {
 
     const onCreated = (payload: any) => {
       const t = normalizeTask(payload);
-      setTasks((prev) => (prev.some((x) => x.id === t.id) ? prev : [t, ...prev]));
+      setTasks((prev) =>
+        prev.some((x) => x.id === t.id) ? prev : [t, ...prev],
+      );
     };
 
     const onUpdated = (payload: any) => {
@@ -150,14 +172,14 @@ export default function BoardPage() {
       setTasks((prev) => prev.filter((x) => x.id !== id));
     };
 
-    socket.on('task:created', onCreated);
-    socket.on('task:updated', onUpdated);
-    socket.on('task:deleted', onDeleted);
+    socket.on("task:created", onCreated);
+    socket.on("task:updated", onUpdated);
+    socket.on("task:deleted", onDeleted);
 
     return () => {
-      socket.off('task:created', onCreated);
-      socket.off('task:updated', onUpdated);
-      socket.off('task:deleted', onDeleted);
+      socket.off("task:created", onCreated);
+      socket.off("task:updated", onUpdated);
+      socket.off("task:deleted", onDeleted);
     };
   }, [socket]);
 
@@ -170,7 +192,8 @@ export default function BoardPage() {
     if (!event.over) return null;
 
     const overId = String(event.over.id);
-    if (overId === 'todo' || overId === 'in-progress' || overId === 'done') return overId;
+    if (overId === "todo" || overId === "in-progress" || overId === "done")
+      return overId;
 
     // Dropped over a card: use that card's status
     const overTask = tasks.find((t) => t.id === overId);
@@ -187,16 +210,18 @@ export default function BoardPage() {
     if (current.status === newStatus) return;
 
     // optimistic
-    setTasks((prev) => prev.map((t) => (t.id === taskId ? { ...t, status: newStatus } : t)));
+    setTasks((prev) =>
+      prev.map((t) => (t.id === taskId ? { ...t, status: newStatus } : t)),
+    );
 
     try {
       await apiFetch(`/api/tasks/${taskId}`, {
-        method: 'PATCH',
+        method: "PATCH",
         body: JSON.stringify({ status: newStatus }),
       });
     } catch (e: any) {
       setTasks((prev) => prev.map((t) => (t.id === taskId ? current : t)));
-      setError(e?.message || 'Update failed');
+      setError(e?.message || "Update failed");
     }
   };
 
@@ -204,24 +229,24 @@ export default function BoardPage() {
     setError(null);
     const title = newTitle.trim();
     if (!title) {
-      setError('Title is required');
+      setError("Title is required");
       return;
     }
 
     setCreating(true);
     try {
-      await apiFetch('/api/tasks', {
-        method: 'POST',
-        body: JSON.stringify({ title, priority: newPriority, status: 'todo' }),
+      await apiFetch("/api/tasks", {
+        method: "POST",
+        body: JSON.stringify({ title, priority: newPriority, status: "todo" }),
       });
-      setNewTitle('');
+      setNewTitle("");
       // realtime event should add it; fallback to reload if socket not connected
       if (!socket) {
-        const data = await apiFetch<{ items: any[] }>('/api/tasks?limit=100');
+        const data = await apiFetch<{ items: any[] }>("/api/tasks?limit=100");
         setTasks(data.items.map(normalizeTask));
       }
     } catch (e: any) {
-      setError(e?.message || 'Create failed');
+      setError(e?.message || "Create failed");
     } finally {
       setCreating(false);
     }
@@ -233,7 +258,9 @@ export default function BoardPage() {
         <div className="flex items-start justify-between gap-4">
           <div>
             <h1 className="text-2xl font-semibold">Kanban Board</h1>
-            <p className="mt-1 text-sm text-zinc-600">Drag cards between columns. Changes sync in realtime.</p>
+            <p className="mt-1 text-sm text-zinc-600">
+              Drag cards between columns. Changes sync in realtime.
+            </p>
           </div>
         </div>
 
@@ -264,11 +291,15 @@ export default function BoardPage() {
             onClick={createTask}
             className="rounded-md bg-zinc-900 px-4 py-2 text-sm text-white hover:bg-black disabled:opacity-60"
           >
-            {creating ? 'Creating…' : 'Add task'}
+            {creating ? "Creating…" : "Add task"}
           </button>
         </div>
 
-        {error && <p className="mt-4 rounded-md border border-red-200 bg-red-50 p-3 text-sm text-red-700">{error}</p>}
+        {error && (
+          <p className="mt-4 rounded-md border border-red-200 bg-red-50 p-3 text-sm text-red-700">
+            {error}
+          </p>
+        )}
 
         {loading ? (
           <div className="mt-6 text-sm text-zinc-600">Loading…</div>
@@ -276,7 +307,12 @@ export default function BoardPage() {
           <DndContext sensors={sensors} onDragEnd={onDragEnd}>
             <div className="mt-6 flex gap-4 overflow-x-auto pb-2">
               {STATUSES.map((s) => (
-                <Column key={s.key} status={s.key} title={s.label} tasks={grouped[s.key]} />
+                <Column
+                  key={s.key}
+                  status={s.key}
+                  title={s.label}
+                  tasks={grouped[s.key]}
+                />
               ))}
             </div>
           </DndContext>
