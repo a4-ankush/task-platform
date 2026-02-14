@@ -22,7 +22,9 @@ function setRefreshCookie(res, token) {
   const isProd = env.NODE_ENV === "production";
   res.cookie("refreshToken", token, {
     httpOnly: true,
-    sameSite: "lax",
+    // Cross-site deployments (e.g. Vercel frontend + Railway backend) require
+    // SameSite=None + Secure for cookies to be sent.
+    sameSite: isProd ? "none" : "lax",
     secure: isProd,
     path: "/api/auth",
   });
@@ -33,7 +35,7 @@ function clearRefreshCookie(res) {
   const isProd = env.NODE_ENV === "production";
   res.clearCookie("refreshToken", {
     httpOnly: true,
-    sameSite: "lax",
+    sameSite: isProd ? "none" : "lax",
     secure: isProd,
     path: "/api/auth",
   });

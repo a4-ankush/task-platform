@@ -88,34 +88,67 @@ docker compose up --build
 ## Submission checklist
 
 - Push this repository to GitHub
-- Deploy:
-  - Frontend: Vercel
-  - Backend: Render/Fly.io/Railway
-  - MongoDB: MongoDB Atlas
-- Update this README with live URLs
 
-## Deployment (suggested)
+## Live URLs
 
-### MongoDB Atlas
+- Frontend (Vercel): https://task-platform-frontend.vercel.app
+- Backend (Railway): https://task-platform-backend-production.up.railway.app
+- Health check: https://task-platform-backend-production.up.railway.app/api/health
+
+## Deployment (Railway + Vercel)
+
+Recommended hosting:
+
+- Frontend: Vercel
+- Backend: Railway
+- MongoDB: MongoDB Atlas
+
+Update this README with the live URLs after deploy.
+
+### 1) MongoDB Atlas
 
 - Create a free cluster
 - Create a DB user + allow network access
 - Copy connection string into backend `MONGODB_URI`
 
-### Backend (Render)
+### 2) Backend (Railway)
 
-- Create a **Web Service** from `/backend`
-- Set build command: `npm ci`
-- Set start command: `npm start`
-- Set env vars from `backend/.env.example` (use strong secrets)
-- Set `CORS_ORIGIN` to your Vercel frontend URL
+1. Create a new Railway project from this GitHub repo.
+2. Add a service for the backend:
 
-### Frontend (Vercel)
+- Root directory: `backend`
+- Build command: `npm ci --omit=dev`
+- Start command: `npm start`
 
-- Import `/frontend`
-- Set env vars:
-  - `NEXT_PUBLIC_API_URL` = your backend base URL (e.g. `https://your-backend.onrender.com`)
-  - `NEXT_PUBLIC_WS_URL` = same as backend base URL
+3. Set environment variables (Railway → Variables) using `backend/.env.example` as a guide:
+
+- `NODE_ENV=production`
+- `MONGODB_URI=<your Atlas connection string>`
+- `JWT_ACCESS_SECRET=<strong secret>`
+- `JWT_REFRESH_SECRET=<strong secret>`
+- `CORS_ORIGIN=<your Vercel URL>` (example: `https://your-app.vercel.app`)
+- `APP_BASE_URL=<your Vercel URL>` (used to generate password reset links)
+- Optional tuning: `RATE_LIMIT_WINDOW_MS`, `RATE_LIMIT_MAX`, token expiry values
+
+Notes:
+
+- Railway provides `PORT` automatically in most setups; if your service expects it, Railway will inject it.
+- Ensure the Railway public URL is HTTPS; use that same base URL for WebSockets.
+
+### 3) Frontend (Vercel)
+
+1. Import the `frontend` folder into Vercel (or import the repo and set Root Directory = `frontend`).
+2. Set environment variables:
+
+- `NEXT_PUBLIC_API_URL` = `https://task-platform-backend-production.up.railway.app`
+- `NEXT_PUBLIC_WS_URL` = `https://task-platform-backend-production.up.railway.app`
+
+3. Deploy.
+
+After deploy:
+
+- Update `CORS_ORIGIN` and `APP_BASE_URL` in Railway to match the final Vercel URL.
+- Confirm realtime works (Socket.IO) and auth flows (cookies + refresh) behave correctly.
 
 ## Environment variables
 

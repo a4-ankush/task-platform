@@ -17,6 +17,12 @@ function createApp() {
   const env = loadEnv();
   const app = express();
 
+  // When deployed behind a reverse proxy (Railway/Render/Fly, etc.), Express must
+  // trust the proxy headers so rate limiting and client IP detection work.
+  if (env.NODE_ENV === "production") {
+    app.set("trust proxy", 1);
+  }
+
   app.disable("x-powered-by");
   app.use(helmet());
   app.use(
