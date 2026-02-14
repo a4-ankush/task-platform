@@ -39,7 +39,7 @@ function Column({
     <div
       ref={setNodeRef}
       className={cx(
-        "flex min-w-[280px] flex-1 flex-col rounded-xl border bg-white transition",
+        "flex min-w-70 flex-1 flex-col rounded-xl border bg-white transition",
         isOver ? "ring-2 ring-zinc-900/20" : "",
       )}
     >
